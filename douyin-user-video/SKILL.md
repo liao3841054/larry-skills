@@ -75,24 +75,27 @@ python douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjABAAAA4LqL
 
 ### 输出目录结构
 
-提取文案后的目录结构分两种场景:
+#### 单视频文案提取
 
-- 单视频链接: 每个视频保存到独立文件夹
-- 博主主页批量处理: 外层先按博主 ID (`sec_uid`) 分组, 内层按视频 ID 分组
+使用 `douyin_downloader.py --action extract` 提取文案时:
 
 ```
 output/
-├── <sec_uid>/  # 博主 sec_uid
-│   ├── 7600361826030865707/   # 视频ID为文件夹名
-│   │   ├── transcript.md      # Markdown 格式文案文件
-│   │   └── 7600361826030865707.mp4  # 使用 --save-video 时保存
-│   └── 7581044356631612699/
-│       ├── transcript.md
-│       └── 7581044356631612699.mp4
-│── 7600361826030865707/   # 视频ID为文件夹名
+└── 7600361826030865707/   # 视频ID为文件夹名
     ├── transcript.md      # Markdown 格式文案文件
     └── 7600361826030865707.mp4  # 使用 --save-video 时保存
 ```
+
+#### 博主主页视频列表
+
+使用 `douyin_user_videos.py` 解析主页时，输出单个 JSON 文件:
+
+```bash
+# 输出到指定路径
+python douyin_user_videos.py --url "主页链接" --output ./output/user_videos.json
+```
+
+JSON 文件内容包含 `sec_uid`、视频总数和视频列表信息，可用于后续批量处理。
 
 ### Markdown 文案格式
 
@@ -154,7 +157,7 @@ print(result['text'])
 1. 打开抖音用户主页 URL（如 `https://www.douyin.com/user/<sec_uid>?f`）
 2. 通过浏览器滚动触发页面继续加载
 3. 从页面中提取每条视频的 `aweme_id`、标题、链接、封面
-4. 输出为 JSON 结果， 保存到output/<sec_uid>/下， 便于后续批量下载或分析
+4. 输出为 JSON 结果，便于后续批量下载或分析
 
 ## 常见问题
 
