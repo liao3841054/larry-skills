@@ -53,20 +53,23 @@ export API_KEY="your-siliconflow-api-key"
 # 获取视频信息和下载链接 (无需 API 密钥)
 python scripts/douyin_downloader.py --link "抖音分享链接" --action info
 
-# 下载视频到指定目录
-python scripts/douyin_downloader.py --link "抖音分享链接" --action download --output ./videos
+# 下载视频到 output/ 目录
+python scripts/douyin_downloader.py --link "抖音分享链接" --action download
 
-# 提取视频文案并保存到文件 (需要 API_KEY 环境变量)
-python scripts/douyin_downloader.py --link "抖音分享链接" --action extract --output ./output
+# 下载视频到指定博主目录 (output/<sec_uid>/<video_id>.mp4)
+python scripts/douyin_downloader.py --link "抖音分享链接" --action download --sec-uid "MS4wLjABAAAA..."
 
-# 提取文案并同时保存视频
-python scripts/douyin_downloader.py --link "抖音分享链接" --action extract --output ./output --save-video
+# 提取视频文案 (需要 API_KEY 环境变量)
+python scripts/douyin_downloader.py --link "抖音分享链接" --action extract
+
+# 提取文案并保存视频到博主目录
+python scripts/douyin_downloader.py --link "抖音分享链接" --action extract --sec-uid "MS4wLjABAAAA..." --save-video
 
 # 安静模式 (减少输出)
-python scripts/douyin_downloader.py --link "抖音分享链接" --action extract --output ./output --quiet
+python scripts/douyin_downloader.py --link "抖音分享链接" --action extract --quiet
 
-# 解析博主主页视频列表并输出 JSON
-python scripts/douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjABAAAA4LqLxq7PLK9xEB5PPazcKTG-3oInPFTDwbqiSrRL_mg?f" --output ./output/user_videos.json
+# 解析博主主页视频列表 (自动保存到 output/<sec_uid>/videos.json)
+python scripts/douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjABAAAA4LqLxq7PLK9xEB5PPazcKTG-3oInPFTDwbqiSrRL_mg?f"
 ```
 
 ### 支持的主页链接格式
@@ -77,27 +80,24 @@ python scripts/douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjAB
 
 ### 输出目录结构
 
-#### 单视频文案提取
-
-使用 `douyin_downloader.py --action extract` 提取文案时:
+所有输出统一在 `output/` 目录下，按博主分组：
 
 ```
 output/
-└── 7600361826030865707/   # 视频ID为文件夹名
-    ├── transcript.md      # Markdown 格式文案文件
-    └── 7600361826030865707.mp4  # 使用 --save-video 时保存
+├── <sec_uid>/                    # 博主目录 (可选)
+│   ├── videos.json               # 博主视频列表 (主页解析生成)
+│   └── <video_id>/               # 视频目录
+│       ├── transcript.md         # Markdown 格式文案
+│       └── <video_id>.mp4        # 视频 (使用 --save-video)
+└── <video_id>/                   # 单视频目录 (无 --sec-uid 时)
+    ├── transcript.md
+    └── <video_id>.mp4
 ```
 
-#### 博主主页视频列表
-
-使用 `scripts/douyin_user_videos.py` 解析主页时，输出单个 JSON 文件:
-
-```bash
-# 输出到指定路径
-python scripts/douyin_user_videos.py --url "主页链接" --output ./output/user_videos.json
-```
-
-JSON 文件内容包含 `sec_uid`、视频总数和视频列表信息，可用于后续批量处理。
+**说明：**
+- 使用 `--sec-uid` 参数时，视频/文案输出到 `output/<sec_uid>/<video_id>/`
+- 不使用 `--sec-uid` 时，直接输出到 `output/<video_id>/`
+- 主页解析 (`douyin_user_videos.py`) 自动保存到 `output/<sec_uid>/videos.json`
 
 ### Markdown 文案格式
 
@@ -131,11 +131,17 @@ print(f"视频ID: {info['video_id']}")
 print(f"标题: {info['title']}")
 print(f"下载链接: {info['url']}")
 
-# 下载视频
-video_path = download_video("抖音分享链接", output_dir="./videos")
+# 下载视频 (无 sec_uid，输出到 output/<video_id>.mp4)
+video_path = download_video("抖音分享链接", output_dir="./output")
 
-# 提取文案并保存到文件
+# 下载视频到博主目录 (输出到 output/<sec_uid>/<video_id>.mp4)
+video_path = download_video("抖音分享链接", output_dir="./output", sec_uid="MS4wLjABAAAA...")
+
+# 提取文案 (无 sec_uid)
 result = extract_text("抖音分享链接", output_dir="./output")
+
+# 提取文案到博主目录 (输出到 output/<sec_uid>/<video_id>/transcript.md)
+result = extract_text("抖音分享链接", output_dir="./output", sec_uid="MS4wLjABAAAA...", save_video=True)
 print(f"文案已保存到: {result['output_path']}")
 print(result['text'])
 ```

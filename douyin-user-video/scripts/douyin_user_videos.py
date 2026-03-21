@@ -196,7 +196,7 @@ def main() -> None:
         """,
     )
     parser.add_argument("--url", "-u", required=True, help="抖音用户主页链接，或包含链接的文本")
-    parser.add_argument("--output", "-o", default="", help="输出 JSON 文件路径（可选）")
+    parser.add_argument("--output", "-o", default="", help="输出目录（默认 output/<sec_uid>/videos.json）")
     parser.add_argument("--max-scrolls", type=int, default=10, help="最大滚动次数（默认 10）")
     parser.add_argument("--scroll-pause", type=float, default=1.2, help="每次滚动后等待秒数（默认 1.2）")
     parser.add_argument("--show-browser", action="store_true", help="显示浏览器窗口（默认无头）")
@@ -213,14 +213,14 @@ def main() -> None:
 
         json_text = json.dumps(result, ensure_ascii=False, indent=2)
 
-        if args.output:
-            output_path = Path(args.output)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(json_text, encoding="utf-8")
-            print(f"已保存到: {output_path}")
-            print(f"共获取视频: {result['video_count']} 条")
-        else:
-            print(json_text)
+        # 统一输出路径：output/<sec_uid>/videos.json
+        sec_uid = result.get("sec_uid", "unknown")
+        output_dir = Path(args.output) if args.output else Path("output") / sec_uid
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / "videos.json"
+        output_path.write_text(json_text, encoding="utf-8")
+        print(f"已保存到: {output_path}")
+        print(f"共获取视频: {result['video_count']} 条")
     except Exception as exc:
         print(f"错误: {exc}", file=sys.stderr)
         sys.exit(1)

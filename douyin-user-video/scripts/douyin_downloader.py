@@ -333,17 +333,35 @@ def get_video_info(share_link: str) -> dict:
     return processor.parse_share_url(share_link)
 
 
-def download_video(share_link: str, output_dir: str = ".") -> Path:
-    """下载视频到指定目录"""
+def download_video(share_link: str, output_dir: str = ".", sec_uid: Optional[str] = None) -> Path:
+    """
+    下载视频到指定目录
+
+    参数:
+        share_link: 抖音分享链接
+        output_dir: 输出根目录
+        sec_uid: 博主ID，若提供则输出到 <output_dir>/<sec_uid>/<video_id>.mp4
+    """
     processor = DouyinProcessor()
     video_info = processor.parse_share_url(share_link)
-    return processor.download_video(video_info, Path(output_dir))
+    base_dir = Path(output_dir)
+    if sec_uid:
+        final_dir = base_dir / sec_uid
+        final_dir.mkdir(parents=True, exist_ok=True)
+        return processor.download_video(video_info, final_dir)
+    return processor.download_video(video_info, base_dir)
 
 
 def extract_text(share_link: str, api_key: Optional[str] = None, output_dir: Optional[str] = None,
-                 save_video: bool = False, show_progress: bool = True) -> dict:
+                 sec_uid: Optional[str] = None, save_video: bool = False, show_progress: bool = True) -> dict:
     """
     从视频中提取文案并保存到文件
+
+    参数:
+        share_link: 抖音分享链接
+        api_key: 硅基流动 API 密钥
+        output_dir: 输出根目录 (默认 output/)
+        sec_uid: 博主ID，若提供则输出到 output/<sec_uid>/<video_id>/
 
     返回:
         dict: 包含 video_info, text, output_path 的字典
@@ -378,8 +396,12 @@ def extract_text(share_link: str, api_key: Optional[str] = None, output_dir: Opt
 
     # 保存到文件
     if output_dir:
+        # 统一输出路径：有 sec_uid 时 output/<sec_uid>/<video_id>/，否则 output/<video_id>/
         output_base = Path(output_dir)
-        video_folder = output_base / video_info['video_id']
+        if sec_uid:
+            video_folder = output_base / sec_uid / video_info['video_id']
+        else:
+            video_folder = output_base / video_info['video_id']
         video_folder.mkdir(parents=True, exist_ok=True)
 
         # 保存文案为 Markdown 格式
@@ -439,7 +461,8 @@ def main():
     parser.add_argument("--action", "-a", choices=["info", "download", "extract"],
                         default="info", help="操作类型: info(获取信息), download(下载视频), extract(提取文案)")
     parser.add_argument("--output", "-o", default="./output", help="输出目录 (默认 ./output)")
-    parser.add_argument("--api-key", "-k", help="硅基流动 API 密钥 (也可通过 DOUYIN_API_KEY 环境变量设置)")
+    parser.add_argument("--sec-uid", "-s", help="博主ID，若提供则输出到 <output>/<sec_uid>/<video_id>/")
+    parser.add_argument("--api-key", "-k", help="硅基流动 API 密钥 (也可通过 API_KEY 环境变量设置)")
     parser.add_argument("--save-video", "-v", action="store_true", help="提取文案时同时保存视频")
     parser.add_argument("--quiet", "-q", action="store_true", help="安静模式，减少输出")
 
@@ -457,7 +480,7 @@ def main():
             print("=" * 50)
 
         elif args.action == "download":
-            video_path = download_video(args.link, args.output)
+            video_path = download_video(args.link, args.output, sec_uid=args.sec_uid)
             print(f"\n视频已保存到: {video_path}")
 
         elif args.action == "extract":
@@ -465,6 +488,7 @@ def main():
                 args.link,
                 args.api_key,
                 output_dir=args.output,
+                sec_uid=args.sec_uid,
                 save_video=args.save_video,
                 show_progress=not args.quiet
             )
