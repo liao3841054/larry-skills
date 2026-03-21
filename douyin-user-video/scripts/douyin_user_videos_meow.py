@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-抖音用户主页视频列表获取 - 哼哼猫 API 方式
+抖音用户主页视频列表获取 - 10倍猫 API 方式
 
 使用哼哼猫「主页批量提取」API 获取主页视频列表，稳定性高。
 支持抖音、TikTok 等多个平台。
@@ -9,7 +9,7 @@
   pip install requests
 
 环境变量:
-  MEOW_API_KEY: 哼哼猫 API 密钥（在开发者管理中心获取）
+  MEOW_API_KEY: 10倍猫 API 密钥（在开发者管理中心获取）
 
 示例:
   python douyin_user_videos_meow.py --url "https://www.douyin.com/user/MS4wLjABAAAA..."
@@ -223,7 +223,7 @@ def fetch_all_videos(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="获取抖音主页视频列表（哼哼猫 API 方式）",
+        description="获取抖音主页视频列表（10倍猫 API 方式）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
@@ -238,7 +238,7 @@ def main() -> None:
         """,
     )
     parser.add_argument("--url", "-u", required=True, help="抖音用户主页链接")
-    parser.add_argument("--api-key", "-k", help="哼哼猫 API 密钥（也可通过 MEOW_API_KEY 环境变量设置）")
+    parser.add_argument("--api-key", "-k", help="10倍猫 API 密钥（也可通过 MEOW_API_KEY 环境变量设置）")
     parser.add_argument("--output", "-o", default="", help="输出目录（默认 output/<sec_uid>/videos.json）")
     parser.add_argument("--max-videos", type=int, default=100, help="最大获取数量（默认 100）")
     parser.add_argument("--delay", type=float, default=1.0, help="分页请求间隔秒数（默认 1.0）")

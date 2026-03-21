@@ -41,7 +41,7 @@ export API_KEY="your-siliconflow-api-key"
 ```
 获取地址：https://cloud.siliconflow.cn/
 
-**主页解析 - 哼哼猫 API**（可选，稳定）：
+**主页解析 - 10倍猫 API**（可选，稳定）：
 ```bash
 export MEOW_API_KEY="your-meow-api-key"
 ```
@@ -52,8 +52,58 @@ export MEOW_API_KEY="your-meow-api-key"
 | 方式 | 稳定性 | 费用 | 依赖 | 适用场景 |
 |------|--------|------|------|----------|
 | Playwright | 高 | 免费 | chromium | 有浏览器环境 |
-| 哼哼猫 API | 高 | 付费 | requests | 无头环境、批量采集 |
+| 10倍猫 API | 高 | 付费 | requests | 无头环境、批量采集 |
 | 抖音 API | 低（易被反爬） | 免费 | requests | 兜底方案 |
+
+## 执行前确认
+
+当用户请求下载博主主页视频时，**必须先询问用户以下问题**，确认后再执行：
+
+### 问题 1：主页视频列表获取方式
+
+询问用户选择哪种方式获取主页视频列表：
+
+| 选项 | 说明 | 适用场景 |
+|------|------|----------|
+| **Playwright（推荐）** | 免费，稳定性高 | 当前环境有浏览器 |
+| **10倍猫 API** | 稳定，需付费 | 无头环境、批量采集 |
+
+如果用户选择 **10倍猫 API**，需要确认是否已有 API Key：
+- 如果有：请用户提供 API Key
+- 如果没有：告知获取地址 https://api.meowload.net/developer
+
+### 问题 2：是否需要提取视频文案/字幕
+
+询问用户是否需要提取视频中的语音文案：
+
+- **需要**：需要硅基流动 API Key（获取地址：https://cloud.siliconflow.cn/）
+- **不需要**：仅下载视频
+
+### 问题 3：下载范围
+
+询问用户下载范围：
+- 下载全部视频
+- 下载前 N 个视频（指定数量）
+
+### 示例询问话术
+
+```
+我将帮你下载博主主页的视频。请先确认以下选项：
+
+1. 主页视频列表获取方式：
+   - A. Playwright（免费，需要浏览器环境）
+   - B. 10倍猫 API（稳定，需要 API Key）
+
+2. 是否需要提取视频文案/字幕？
+   - 需要（需要硅基流动 API Key）
+   - 不需要（仅下载视频）
+
+3. 下载范围：
+   - 全部视频
+   - 前 N 个视频（请指定数量）
+
+请回复你的选择，如 "A，需要字幕，前10个" 或 "B，不需要字幕，全部"
+```
 
 ## 使用方法
 
@@ -83,7 +133,7 @@ python scripts/douyin_downloader.py --link "抖音分享链接" --action extract
 # 解析博主主页视频列表 (自动选择方式，Playwright 优先)
 python scripts/douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjABAAAA4LqLxq7PLK9xEB5PPazcKTG-3oInPFTDwbqiSrRL_mg?f"
 
-# 使用哼哼猫 API（稳定，适合无头环境）
+# 使用10倍猫 API（稳定，适合无头环境）
 python scripts/douyin_user_videos.py --url "主页链接" --method meow --api-key "your-api-key"
 
 # 使用抖音 API（兜底方案）
@@ -92,7 +142,7 @@ python scripts/douyin_user_videos.py --url "主页链接" --method dy_api
 # 使用 Playwright 并显示浏览器
 python scripts/douyin_user_videos.py --url "主页链接" --method playwright --show-browser
 
-# 单独使用哼哼猫 API 脚本
+# 单独使用10倍猫 API 脚本
 python scripts/douyin_user_videos_meow.py --url "主页链接" --api-key "your-api-key"
 ```
 

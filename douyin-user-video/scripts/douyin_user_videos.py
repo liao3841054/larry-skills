@@ -4,7 +4,7 @@
 
 支持三种方式:
 1. Playwright 浏览器渲染（免费，稳定性高）
-2. 哼哼猫 API（稳定，需要 API Key）
+2. 10倍猫 API（稳定，需要 API Key）
 3. 抖音 API（兜底方案，可能被反爬）
 
 自动降级：当 Playwright 不可用时，自动尝试其他方式。
@@ -16,7 +16,7 @@
 
   # 方式2/3 API（需要 requests）
   pip install requests
-  设置环境变量: MEOW_API_KEY（哼哼猫 API）
+  设置环境变量: MEOW_API_KEY（10倍猫 API）
 
 示例:
   python douyin_user_videos.py --url "https://www.douyin.com/user/MS4wLjABAAAA..."
@@ -69,13 +69,13 @@ def parse_sec_uid_from_url(url: str) -> str:
     return match.group(1) if match else ""
 
 
-# ============ 哼哼猫 API 方式 ============
+# ============ 10倍猫 API 方式 ============
 
 MEOW_API_URL = "https://api.meowload.net/openapi/extract/playlist"
 
 
 def fetch_meow_page(url: str, api_key: str, cursor: Optional[str] = None) -> Dict:
-    """哼哼猫 API 获取单页数据"""
+    """10倍猫 API 获取单页数据"""
     if not REQUESTS_AVAILABLE:
         raise ImportError("缺少 requests 模块，请执行: pip install requests")
 
@@ -104,7 +104,7 @@ def fetch_meow_page(url: str, api_key: str, cursor: Optional[str] = None) -> Dic
 
 
 def parse_meow_posts(posts: List[Dict]) -> List[Dict]:
-    """解析哼哼猫 API 返回的 posts"""
+    """解析10倍猫 API 返回的 posts"""
     videos = []
     for post in posts:
         post_id = post.get("id", "")
@@ -152,7 +152,7 @@ def collect_via_meow(
     delay: float = 1.0,
     show_progress: bool = True,
 ) -> Dict:
-    """哼哼猫 API 方式获取视频列表"""
+    """10倍猫 API 方式获取视频列表"""
     all_videos = []
     cursor = None
     page = 1
@@ -429,7 +429,7 @@ def main() -> None:
 
 方式说明:
   playwright - 浏览器渲染（免费，稳定，需要安装 chromium）
-  meow      - 哼哼猫 API（稳定，需要 API Key）
+  meow      - 10倍猫 API（稳定，需要 API Key）
   dy_api    - 抖音 API（免费，可能被反爬）
   auto      - 自动选择（playwright > meow > dy_api）
         """,
@@ -438,7 +438,7 @@ def main() -> None:
     parser.add_argument("--output", "-o", default="", help="输出目录（默认 output/<sec_uid>/videos.json）")
     parser.add_argument("--method", "-m", choices=["auto", "playwright", "meow", "dy_api"], default="auto",
                         help="获取方式: auto(自动), playwright(浏览器), meow(哼哼猫API), dy_api(抖音API)")
-    parser.add_argument("--api-key", "-k", help="哼哼猫 API 密钥（也可通过 MEOW_API_KEY 环境变量设置）")
+    parser.add_argument("--api-key", "-k", help="10倍猫 API 密钥（也可通过 MEOW_API_KEY 环境变量设置）")
     parser.add_argument("--max-scrolls", type=int, default=10, help="Playwright 最大滚动次数（默认 10）")
     parser.add_argument("--scroll-pause", type=float, default=1.2, help="Playwright 滚动等待秒数（默认 1.2）")
     parser.add_argument("--max-videos", type=int, default=100, help="API 方式最大获取数量（默认 100）")
@@ -474,7 +474,7 @@ def main() -> None:
                 except Exception as e:
                     print(f"Playwright 失败: {e}", file=sys.stderr)
                     if meow_api_key and REQUESTS_AVAILABLE:
-                        print("降级到哼哼猫 API 方式...")
+                        print("降级到10倍猫 API 方式...")
                         result = collect_via_meow(user_url, meow_api_key, max_videos=args.max_videos, delay=args.delay)
                     elif REQUESTS_AVAILABLE:
                         print("降级到抖音 API 方式...")
@@ -482,7 +482,7 @@ def main() -> None:
                     else:
                         raise
             elif meow_api_key and REQUESTS_AVAILABLE:
-                print("使用哼哼猫 API 方式...")
+                print("使用10倍猫 API 方式...")
                 result = collect_via_meow(user_url, meow_api_key, max_videos=args.max_videos, delay=args.delay)
             elif REQUESTS_AVAILABLE:
                 print("使用抖音 API 方式...")
@@ -503,7 +503,7 @@ def main() -> None:
 
         elif method == "meow":
             if not meow_api_key:
-                print("错误: 需要哼哼猫 API 密钥", file=sys.stderr)
+                print("错误: 需要10倍猫 API 密钥", file=sys.stderr)
                 print("  通过 --api-key 参数或 MEOW_API_KEY 环境变量设置", file=sys.stderr)
                 sys.exit(1)
             result = collect_via_meow(user_url, meow_api_key, max_videos=args.max_videos, delay=args.delay)
